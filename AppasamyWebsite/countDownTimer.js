@@ -1,31 +1,47 @@
-// Set the date and time to count down to
-var countDownDate = new Date("May 11, 2023 09:30:00").getTime();
+(function () {
+  var deadline = "2023/05/11 09:00";
 
-// Update the count down every second
-var x = setInterval(function () {
-  // Get today's date and time
-  var now = new Date().getTime();
-
-  // Find the distance between now and the count down date
-  var distance = countDownDate - now;
-
-  // Calculate remaining days, hours, minutes and seconds
-  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-  // Display the result
-  document.getElementById("countdown").innerHTML = `${JSON.stringify(
-    days
-  )} : ${JSON.stringify(hours)} : ${JSON.stringify(minutes)} : ${JSON.stringify(
-    seconds
-  )} \n
-   DAYS     HOURS    MINUTES   SECONDS`;
-
-  // If the count down is finished, clear the interval
-  if (distance < 0) {
-    clearInterval(x);
-    document.getElementById("countdown").innerHTML = "Countdown finished!";
+  function pad(num, size) {
+    var s = "0" + num;
+    return s.substr(s.length - size);
   }
-}, 1000);
+
+  // fixes "Date.parse(date)" on safari
+  function parseDate(date) {
+    const parsed = Date.parse(date);
+    if (!isNaN(parsed)) return parsed;
+    return Date.parse(date.replace(/-/g, "/").replace(/[a-z]+/gi, " "));
+  }
+
+  function getTimeRemaining(endtime) {
+    let total = parseDate(endtime) - Date.parse(new Date());
+    let seconds = Math.floor((total / 1000) % 60);
+    let minutes = Math.floor((total / 1000 / 60) % 60);
+    let hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    let days = Math.floor(total / (1000 * 60 * 60 * 24));
+
+    return { total, days, hours, minutes, seconds };
+  }
+
+  function clock(id, endtime) {
+    let days = document.getElementById(id + "-days");
+    let hours = document.getElementById(id + "-hours");
+    let minutes = document.getElementById(id + "-minutes");
+    let seconds = document.getElementById(id + "-seconds");
+
+    var timeinterval = setInterval(function () {
+      var time = getTimeRemaining(endtime);
+
+      if (time.total <= 0) {
+        clearInterval(timeinterval);
+      } else {
+        days.innerHTML = pad(time.days, 2);
+        hours.innerHTML = pad(time.hours, 2);
+        minutes.innerHTML = pad(time.minutes, 2);
+        seconds.innerHTML = pad(time.seconds, 2);
+      }
+    }, 1000);
+  }
+
+  clock("js-clock", deadline);
+})();
